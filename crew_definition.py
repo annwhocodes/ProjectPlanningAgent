@@ -18,8 +18,8 @@ class ProjectPlanOutput(BaseModel):
     milestones: List[MilestoneOutput] = Field(..., description="List of project milestones")
 
 crew = Crew(
-    agents=list(agents.values()),  # Load all agents from YAML
-    tasks=list(tasks.values()),    # Load all tasks from YAML
-    output_pydantic=ProjectPlanOutput,  # ✅ Return structured output
+    agents=list(agents.values()),  
+    tasks=list(tasks.values()),   
+    output_pydantic=ProjectPlanOutput,
     verbose=True
 )
