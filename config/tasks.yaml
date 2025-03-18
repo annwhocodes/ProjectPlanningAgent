@@ -1,0 +1,14 @@
+task_breakdown:
+  description: "Analyze the project requirements and break the website project into structured phases."
+  agent: "project_planning_agent"
+  expected_output: "A structured breakdown of website development tasks."
+
+time_resource_estimation:
+  description: "Estimate the time and resources needed for each task."
+  agent: "estimation_agent"
+  expected_output: "Estimated time and required resources for each project phase."
+
+resource_allocation:
+  description: "Assign personnel and technical resources to the identified tasks."
+  agent: "resource_allocation_agent"
+  expected_output: "A resource allocation plan mapping team members to tasks."
