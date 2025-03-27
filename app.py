@@ -7,12 +7,11 @@ from trello_utils import get_board_id, get_or_create_list, create_card, update_c
 from litellm.exceptions import RateLimitError
 from parse_allocation import parse_allocation_plan
 
-# Initialize Streamlit app
 st.set_page_config(page_title="Project Planner AI", layout="wide")
 st.title("🛠️ AI-Powered Project Planner")
 st.markdown("Use AI to generate a structured project plan and track it on Trello.")
 
-# Sidebar inputs
+
 st.sidebar.header("Project Details")
 inputs["project_type"] = st.sidebar.text_input("Project Type", value=inputs["project_type"])
 inputs["project_objectives"] = st.sidebar.text_area("Project Objectives", value=inputs["project_objectives"])
@@ -41,10 +40,9 @@ def run_crew_with_retry():
 if st.sidebar.button("Generate Project Plan"):
     result = run_crew_with_retry()
     if result:
-        # Debug: Show the raw result structure
+
         st.write("Debug - Raw Result Structure:", result)
         
-        # Extract the resource allocation output from tasks_output
         raw_alloc = None
         if "tasks_output" in result and isinstance(result["tasks_output"], list):
             for task_output in result["tasks_output"]:
@@ -53,14 +51,13 @@ if st.sidebar.button("Generate Project Plan"):
                     break
         
         if raw_alloc:
-            # Show the raw output for debugging
+
             st.text_area("Raw Allocation Output", raw_alloc, height=200)
             
-            # Parse the allocation output
+
             parsed_data = parse_allocation_plan(raw_alloc)
             tasks = []
             
-            # Extract tasks from the parsed phases
             for phase in parsed_data.get("phases", []):
                 for task in phase.get("tasks", []):
                     tasks.append({
@@ -71,10 +68,10 @@ if st.sidebar.button("Generate Project Plan"):
                         "phase": f"{phase['phase_number']}. {phase['phase_name']}"
                     })
             
-            # Save the structured tasks to JSON
+
             save_tasks_to_json(tasks)
             
-            # Display the results
+
             st.success("✅ Project Plan Generated!")
             st.subheader("📌 Project Overview")
             st.markdown(f"""
@@ -99,7 +96,7 @@ if st.sidebar.button("Generate Project Plan"):
             if not board_id:
                 st.error("❌ Failed to find the Trello board. Make sure 'My Project Manager Crew' exists.")
             else:
-                # Create lists for each phase
+          
                 phase_lists = {}
                 for phase in parsed_data.get("phases", []):
                     list_name = f"{phase['phase_number']}. {phase['phase_name']}"
@@ -107,7 +104,7 @@ if st.sidebar.button("Generate Project Plan"):
                     if list_id:
                         phase_lists[phase['phase_number']] = list_id
                 
-                # Create standard lists
+             
                 todo_list_id = get_or_create_list(board_id, "To Do")
                 in_progress_list_id = get_or_create_list(board_id, "In Progress")
                 completed_list_id = get_or_create_list(board_id, "Completed")
@@ -122,7 +119,7 @@ if st.sidebar.button("Generate Project Plan"):
                     if task.get("resources"):
                         trello_task_desc += f"\nResources: {', '.join(task['resources'])}"
                     
-                    # Determine which list to add the card to
+                    
                     target_list_id = phase_lists.get(int(task['phase'].split('.')[0]), todo_list_id)
                     
                     st.write(f"📌 Adding Task to Trello: {task['task_name']}")
@@ -137,8 +134,8 @@ if st.sidebar.button("Generate Project Plan"):
                 
                 st.success("✅ Tasks added to Trello successfully!")
                 
-                # Optional: Move some tasks through workflow for demo
-                demo_tasks = list(trello_task_ids.items())[:3]  # Just demo with first 3 tasks
+             
+                demo_tasks = list(trello_task_ids.items())[:3]  
                 for task_name, card_id in demo_tasks:
                     time.sleep(2)
                     st.write(f"⏳ Moving {task_name} to 'In Progress'")
@@ -150,4 +147,4 @@ if st.sidebar.button("Generate Project Plan"):
                 st.success("🎉 Trello board updated with task statuses!")
         else:
             st.warning("⚠️ No resource allocation output was generated.")
-            st.write("Debug - Full result object:", result)  # Show full result for debugging
+            st.write("Debug - Full result object:", result)  
