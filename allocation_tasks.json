@@ -1,19 +1,95 @@
 {
     "tasks": [
         {
-            "task_name": "No Name",
-            "assigned_to": "Unassigned",
-            "duration": "N/A"
+            "task_name": "1.1 - Conduct stakeholder interviews",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "1. Requirements Gathering"
         },
         {
-            "task_name": "No Name",
-            "assigned_to": "Unassigned",
-            "duration": "N/A"
+            "task_name": "1.2 - Review existing documentation and research",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "1. Requirements Gathering"
         },
         {
-            "task_name": "No Name",
-            "assigned_to": "Unassigned",
-            "duration": "N/A"
+            "task_name": "1.3 - Identify and document functional and non-functional requirements",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "1. Requirements Gathering"
+        },
+        {
+            "task_name": "1.4 - Create a user story map",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "1. Requirements Gathering"
+        },
+        {
+            "task_name": "2.1 - Develop a detailed project schedule",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "2. Planning"
+        },
+        {
+            "task_name": "2.2 - Create a project timeline",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "2. Planning"
+        },
+        {
+            "task_name": "2.3 - Identify and document project risks",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "2. Planning"
+        },
+        {
+            "task_name": "2.4 - Establish communication and collaboration plan",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "2. Planning"
+        },
+        {
+            "task_name": "2.5 - Define project scope and boundaries",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "2. Planning"
+        },
+        {
+            "task_name": "3.1 - Create wireframes and mockups",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "3. Design"
+        },
+        {
+            "task_name": "3.2 - Develop a visual design concept",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "3. Design"
+        },
+        {
+            "task_name": "3.3 - Design database schema and data models",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "3. Design"
+        },
+        {
+            "task_name": "3.4 - Plan and design search engine optimization (SEO)",
+            "assigned_to": "",
+            "duration": null,
+            "resources": [],
+            "phase": "3. Design"
         }
     ]
 }
