@@ -1,9 +1,18 @@
 import time
+import threading
 import streamlit as st
 import json
+from trello_utils import (
+    get_board_id,
+    load_tasks_from_json,
+    parse_allocation_tasks,
+    add_tasks_from_allocation,
+    check_phase_1_completion,
+    get_or_create_list
+)
+from agents import save_allocation_to_json
 from crew_definition import crew
 from crew_input import inputs
-from trello_utils import get_board_id, get_or_create_list, create_card, update_card_status, save_tasks_to_json, load_tasks_from_json
 from litellm.exceptions import RateLimitError
 from parse_allocation import parse_allocation_plan
 
@@ -11,7 +20,13 @@ st.set_page_config(page_title="Project Planner AI", layout="wide")
 st.title("🛠️ AI-Powered Project Planner")
 st.markdown("Use AI to generate a structured project plan and track it on Trello.")
 
+# Initialize session state variables
+if 'trello_status' not in st.session_state:
+    st.session_state.trello_status = ""
+if 'syncing' not in st.session_state:
+    st.session_state.syncing = False
 
+# Sidebar for Project Details
 st.sidebar.header("Project Details")
 inputs["project_type"] = st.sidebar.text_input("Project Type", value=inputs["project_type"])
 inputs["project_objectives"] = st.sidebar.text_area("Project Objectives", value=inputs["project_objectives"])
@@ -19,8 +34,8 @@ inputs["industry"] = st.sidebar.text_input("Industry", value=inputs["industry"])
 inputs["team_members"] = st.sidebar.text_area("Team Members", value=inputs["team_members"])
 inputs["project_requirements"] = st.sidebar.text_area("Project Requirements", value=inputs["project_requirements"])
 
+# Function to run Crew with retry logic for rate limits
 def run_crew_with_retry():
-    """Run the crew with retry logic for rate limits."""
     retries = 3
     for attempt in range(retries):
         try:
@@ -37,12 +52,53 @@ def run_crew_with_retry():
     st.error("Crew execution failed after multiple attempts. Try again later.")
     return None
 
+
+def check_phase_1_completion_background(board_id, tasks):
+    phase_1_tasks, phase_2_tasks = parse_allocation_tasks(tasks)
+    
+    # Add Phase 1 tasks to Trello
+    phase_1_list_id = get_or_create_list(board_id, "Phase 1 - Not Started")
+    add_tasks_from_allocation(board_id, phase_1_tasks, "Phase 1 - Not Started")
+    
+    # Update session state to show user what's happening
+    st.session_state.trello_status = "✅ Phase 1 tasks added to Trello. Checking completion every 2 minutes..."
+    
+    # Keep checking until complete
+    while True:
+        # Check if all Phase 1 tasks are marked as completed
+        if check_phase_1_completion(board_id, "Phase 1 - Not Started"):
+            # Add Phase 2 tasks
+            phase_2_list_id = get_or_create_list(board_id, "Phase 2 - Not Started")
+            add_tasks_from_allocation(board_id, phase_2_tasks, "Phase 2 - Not Started")
+            st.session_state.trello_status = "🎉 Phase 1 tasks completed! Phase 2 tasks added to Trello."
+            st.session_state.syncing = False
+            break
+        
+        time.sleep(120)  
+
+def sync_with_trello(parsed_data, tasks):
+    board_id = get_board_id()  
+    if not board_id:
+        st.session_state.trello_status = "❌ Failed to find the Trello board. Make sure 'My Project Manager Crew' exists."
+        st.session_state.syncing = False
+        return
+    
+    st.session_state.trello_status = f"✅ Connected to Trello board 'My Project Manager Crew'. Starting synchronization..."
+    
+
+    sync_thread = threading.Thread(
+        target=check_phase_1_completion_background,
+        args=(board_id, tasks),
+        daemon=True
+    )
+    sync_thread.start()
+
+
 if st.sidebar.button("Generate Project Plan"):
     result = run_crew_with_retry()
     if result:
-
         st.write("Debug - Raw Result Structure:", result)
-        
+
         raw_alloc = None
         if "tasks_output" in result and isinstance(result["tasks_output"], list):
             for task_output in result["tasks_output"]:
@@ -51,9 +107,7 @@ if st.sidebar.button("Generate Project Plan"):
                     break
         
         if raw_alloc:
-
             st.text_area("Raw Allocation Output", raw_alloc, height=200)
-            
 
             parsed_data = parse_allocation_plan(raw_alloc)
             tasks = []
@@ -67,10 +121,8 @@ if st.sidebar.button("Generate Project Plan"):
                         "resources": task.get("resources", []),
                         "phase": f"{phase['phase_number']}. {phase['phase_name']}"
                     })
-            
 
-            save_tasks_to_json(tasks)
-            
+            save_allocation_to_json(tasks)
 
             st.success("✅ Project Plan Generated!")
             st.subheader("📌 Project Overview")
@@ -89,62 +141,21 @@ if st.sidebar.button("Generate Project Plan"):
                     st.write(f"**👥 Resources:** {', '.join(task['resources'])}")
                 st.write(f"**📌 Phase:** {task['phase']}")
                 st.write("---")
-            
-            # Sync with Trello
-            st.subheader("🔄 Syncing with Trello")
-            board_id = get_board_id("My Project Manager Crew")
-            if not board_id:
-                st.error("❌ Failed to find the Trello board. Make sure 'My Project Manager Crew' exists.")
-            else:
-          
-                phase_lists = {}
-                for phase in parsed_data.get("phases", []):
-                    list_name = f"{phase['phase_number']}. {phase['phase_name']}"
-                    list_id = get_or_create_list(board_id, list_name)
-                    if list_id:
-                        phase_lists[phase['phase_number']] = list_id
-                
-             
-                todo_list_id = get_or_create_list(board_id, "To Do")
-                in_progress_list_id = get_or_create_list(board_id, "In Progress")
-                completed_list_id = get_or_create_list(board_id, "Completed")
-                
-                trello_task_ids = {}
-                for task in tasks:
-                    trello_task_desc = (
-                        f"Assigned to: {task['assigned_to']}\n"
-                        f"Duration: {task['duration']}\n"
-                        f"Phase: {task['phase']}"
-                    )
-                    if task.get("resources"):
-                        trello_task_desc += f"\nResources: {', '.join(task['resources'])}"
-                    
-                    
-                    target_list_id = phase_lists.get(int(task['phase'].split('.')[0]), todo_list_id)
-                    
-                    st.write(f"📌 Adding Task to Trello: {task['task_name']}")
-                    card_response = create_card(target_list_id, task['task_name'], trello_task_desc)
-                    
-                    if not card_response or "id" not in card_response:
-                        st.error(f"❌ Failed to create Trello card for task: {task['task_name']}")
-                        continue
-                    
-                    card_id = card_response["id"]
-                    trello_task_ids[task['task_name']] = card_id
-                
-                st.success("✅ Tasks added to Trello successfully!")
-                
-             
-                demo_tasks = list(trello_task_ids.items())[:3]  
-                for task_name, card_id in demo_tasks:
-                    time.sleep(2)
-                    st.write(f"⏳ Moving {task_name} to 'In Progress'")
-                    update_card_status(card_id, in_progress_list_id)
-                    time.sleep(3)
-                    st.write(f"✅ Marking {task_name} as 'Completed'")
-                    update_card_status(card_id, completed_list_id)
-                
-                st.success("🎉 Trello board updated with task statuses!")
+
+
+            if not st.session_state.syncing:
+                st.session_state.syncing = True
+                sync_with_trello(parsed_data, tasks)
+
         else:
             st.warning("⚠️ No resource allocation output was generated.")
-            st.write("Debug - Full result object:", result)  
+            st.write("Debug - Full result object:", result)
+
+
+if st.session_state.syncing:
+    st.subheader("🔄 Trello Synchronization Status")
+    st.info(st.session_state.trello_status)
+    
+
+    if st.button("Refresh Status"):
+        st.rerun()
