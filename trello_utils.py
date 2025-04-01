@@ -63,7 +63,34 @@ def get_or_create_list(board_id, list_name):
     return response.json().get("id")
 
 
-def create_card(list_id, task_name, description):
+def get_member_id_by_username(username):
+    """Get Trello member ID by username."""
+    url = f"{BASE_URL}/members/{username}"
+    query = {
+        "key": TRELLO_API_KEY,
+        "token": TRELLO_OAUTH_TOKEN
+    }
+    response = requests.get(url, params=query)
+    if response.status_code == 200:
+        return response.json().get("id")
+    print(f"⚠️ Member with username '{username}' not found")
+    return None
+
+
+def get_board_members(board_id):
+    """Get all members of a board with their IDs."""
+    url = f"{BASE_URL}/boards/{board_id}/members"
+    query = {
+        "key": TRELLO_API_KEY,
+        "token": TRELLO_OAUTH_TOKEN
+    }
+    response = requests.get(url, params=query)
+    if response.status_code == 200:
+        return {member.get("username"): member.get("id") for member in response.json()}
+    return {}
+
+
+def create_card(list_id, task_name, description, assigned_to=None):
     url = f"{BASE_URL}/cards"
     due_date = (datetime.datetime.now() + datetime.timedelta(days=7)).isoformat()
     
@@ -75,17 +102,41 @@ def create_card(list_id, task_name, description):
         "desc": description,
         "due": due_date
     }
+    
     response = requests.post(url, params=params)
     print(f"🔹 Trello API Status Code: {response.status_code}")
-    print(f"🔹 Trello API Response Text: {response.text}")
+    
     if response.status_code != 200:
         print(f"❌ Trello API Error: {response.status_code} - {response.text}")
         return None
+    
     try:
-        return response.json()
+        card = response.json()
+        
+        # Assign the card to a member if provided
+        if assigned_to and card.get("id"):
+            assign_member_to_card(card.get("id"), assigned_to)
+            
+        return card
     except requests.exceptions.JSONDecodeError:
         print("❌ Trello API returned an empty or invalid response.")
         return None
+
+
+def assign_member_to_card(card_id, member_id):
+    """Assign a member to a card."""
+    url = f"{BASE_URL}/cards/{card_id}/idMembers"
+    params = {
+        "key": TRELLO_API_KEY,
+        "token": TRELLO_OAUTH_TOKEN,
+        "value": member_id
+    }
+    response = requests.post(url, params=params)
+    if response.status_code == 200:
+        print(f"✅ Assigned member to card {card_id}")
+        return True
+    print(f"❌ Failed to assign member to card: {response.status_code} - {response.text}")
+    return False
 
 
 def update_card_status(card_id, new_list_id):
@@ -117,41 +168,66 @@ def load_tasks_from_json():
 
 
 def parse_allocation_tasks(tasks):
-    phase_1_tasks = []
-    phase_2_tasks = []
-
+    """Parse tasks into different phases based on phase number."""
+    phases = {}
+    
     for task in tasks:
         phase_str = task.get("phase", "")
-        # Extract just the number at the beginning
-        if phase_str.startswith("1"):
-            phase_1_tasks.append(task)
-        elif phase_str.startswith("2"):
-            phase_2_tasks.append(task)
+        # Extract phase number
+        phase_num = ""
+        for char in phase_str:
+            if char.isdigit():
+                phase_num += char
+            else:
+                break
+                
+        if phase_num:
+            if phase_num not in phases:
+                phases[phase_num] = []
+            phases[phase_num].append(task)
     
-    return phase_1_tasks, phase_2_tasks
+    return phases
 
 
 def add_tasks_from_allocation(board_id, tasks, phase_list_name):
     phase_list_id = get_or_create_list(board_id, phase_list_name)
-
+    board_members = get_board_members(board_id)
+    
     for task in tasks:
         task_name = task.get("task_name")
         description = task.get("description", "Task Description")
+        assignee = task.get("assigned_to")
+        
         print(f"📌 Adding Task to Trello: {task_name}")
-        create_card(phase_list_id, task_name, description)
+        
+        member_id = None
+        if assignee:
+            # Try to find member ID from board members
+            member_id = board_members.get(assignee)
+            
+            # If not found on board, try to get by username
+            if not member_id:
+                member_id = get_member_id_by_username(assignee)
+                
+            if member_id:
+                print(f"👤 Assigning task to: {assignee}")
+            else:
+                print(f"⚠️ Could not find member: {assignee}")
+        
+        create_card(phase_list_id, task_name, description, member_id)
     
     print(f"✅ Tasks from {phase_list_name} added to Trello successfully!")
 
 
-def check_phase_1_completion(board_id, phase_1_list_name):
-    phase_1_list_id = get_or_create_list(board_id, phase_1_list_name)
+def check_phase_completion(board_id, phase_list_name):
+    phase_list_id = get_or_create_list(board_id, phase_list_name)
 
-    url = f"{BASE_URL}/lists/{phase_1_list_id}/cards"
+    url = f"{BASE_URL}/lists/{phase_list_id}/cards"
     query = {
         "key": TRELLO_API_KEY,
         "token": TRELLO_OAUTH_TOKEN
     }
-    print(f"🔍 Checking completion status for list: {phase_1_list_name} (ID: {phase_1_list_id})")
+    print(f"🔍 Checking completion status for list: {phase_list_name} (ID: {phase_list_id})")
     response = requests.get(url, params=query)
     
     if response.status_code == 200:
@@ -181,25 +257,49 @@ def check_phase_1_completion(board_id, phase_1_list_name):
 def check_and_add_tasks():
     board_id = get_board_id()
     
-   
+    # Load tasks from JSON
     tasks = load_tasks_from_json()
     
- 
-    phase_1_tasks, phase_2_tasks = parse_allocation_tasks(tasks)
+    # Parse tasks into multiple phases
+    phases = parse_allocation_tasks(tasks)
     
+    # Sort phases by number to ensure sequential processing
+    sorted_phases = sorted(phases.keys(), key=int)
     
-    add_tasks_from_allocation(board_id, phase_1_tasks, "Phase 1 - Not Started")
+    current_phase_index = 0
     
-    
-    while True:
-        print("🔄 Checking if all Phase 1 tasks are completed...")
-        if check_phase_1_completion(board_id, "Phase 1 - Not Started"):
-            print("✅ Phase 1 tasks completed. Proceeding to add Phase 2 tasks.")
-            add_tasks_from_allocation(board_id, phase_2_tasks, "Phase 2 - Not Started")
-            break  
+    while current_phase_index < len(sorted_phases):
+        current_phase = sorted_phases[current_phase_index]
+        current_phase_name = f"Phase {current_phase} - Not Started"
+        next_phase_name = f"Phase {current_phase} - Completed"
         
-        print("⚠️ Phase 1 tasks are not completed yet.")
-        time.sleep(120)  
+        print(f"🔄 Working on {current_phase_name}")
+        
+        # Add tasks for the current phase if they don't exist yet
+        add_tasks_from_allocation(board_id, phases[current_phase], current_phase_name)
+        
+        # Keep checking until current phase is complete
+        while True:
+            print(f"🔄 Checking if all tasks in {current_phase_name} are completed...")
+            if check_phase_completion(board_id, current_phase_name):
+                print(f"✅ Tasks in {current_phase_name} completed.")
+                
+                # Move completed tasks to the completed list
+                completed_list_id = get_or_create_list(board_id, next_phase_name)
+                
+                # Move to next phase
+                current_phase_index += 1
+                
+                if current_phase_index < len(sorted_phases):
+                    next_phase = sorted_phases[current_phase_index]
+                    print(f"➡️ Moving to Phase {next_phase}")
+                else:
+                    print("🎉 All phases completed!")
+                
+                break
+            
+            print(f"⚠️ Tasks in {current_phase_name} are not completed yet.")
+            time.sleep(120)  # Check every 2 minutes
 
 if __name__ == "__main__":
     check_and_add_tasks()

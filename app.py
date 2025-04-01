@@ -7,7 +7,7 @@ from trello_utils import (
     load_tasks_from_json,
     parse_allocation_tasks,
     add_tasks_from_allocation,
-    check_phase_1_completion,
+    check_phase_completion,
     get_or_create_list
 )
 from agents import save_allocation_to_json
@@ -25,6 +25,10 @@ if 'trello_status' not in st.session_state:
     st.session_state.trello_status = ""
 if 'syncing' not in st.session_state:
     st.session_state.syncing = False
+if 'current_phase' not in st.session_state:
+    st.session_state.current_phase = None
+if 'phases' not in st.session_state:
+    st.session_state.phases = {}
 
 # Sidebar for Project Details
 st.sidebar.header("Project Details")
@@ -53,42 +57,88 @@ def run_crew_with_retry():
     return None
 
 
-def check_phase_1_completion_background(board_id, tasks):
-    phase_1_tasks, phase_2_tasks = parse_allocation_tasks(tasks)
+def check_phases_background(board_id, phases):
+    """Background thread to monitor phase completion and add new phases sequentially"""
+    # Get sorted phase numbers
+    sorted_phases = sorted(phases.keys(), key=int)
     
-    # Add Phase 1 tasks to Trello
-    phase_1_list_id = get_or_create_list(board_id, "Phase 1 - Not Started")
-    add_tasks_from_allocation(board_id, phase_1_tasks, "Phase 1 - Not Started")
+    if not sorted_phases:
+        st.session_state.trello_status = "⚠️ No phases found in tasks!"
+        st.session_state.syncing = False
+        return
     
-    # Update session state to show user what's happening
-    st.session_state.trello_status = "✅ Phase 1 tasks added to Trello. Checking completion every 2 minutes..."
+    # Start with the first phase
+    current_phase_index = 0
     
-    # Keep checking until complete
-    while True:
-        # Check if all Phase 1 tasks are marked as completed
-        if check_phase_1_completion(board_id, "Phase 1 - Not Started"):
-            # Add Phase 2 tasks
-            phase_2_list_id = get_or_create_list(board_id, "Phase 2 - Not Started")
-            add_tasks_from_allocation(board_id, phase_2_tasks, "Phase 2 - Not Started")
-            st.session_state.trello_status = "🎉 Phase 1 tasks completed! Phase 2 tasks added to Trello."
-            st.session_state.syncing = False
-            break
+    # Add first phase tasks to Trello
+    current_phase = sorted_phases[current_phase_index]
+    current_phase_name = f"Phase {current_phase} - Not Started"
+    
+    # Store current phase in session state for display
+    st.session_state.current_phase = current_phase
+    
+    # Add tasks for first phase
+    add_tasks_from_allocation(board_id, phases[current_phase], current_phase_name)
+    st.session_state.trello_status = f"✅ {current_phase_name} tasks added to Trello. Monitoring completion..."
+    
+    # Process phases sequentially
+    while current_phase_index < len(sorted_phases):
+        current_phase = sorted_phases[current_phase_index]
+        current_phase_name = f"Phase {current_phase} - Not Started"
+        completed_phase_name = f"Phase {current_phase} - Completed"
         
-        time.sleep(120)  
+        # Update session state
+        st.session_state.current_phase = current_phase
+        st.session_state.trello_status = f"🔍 Monitoring completion of {current_phase_name}. Checking every 2 minutes..."
+        
+        # Wait until current phase is complete
+        while True:
+            if check_phase_completion(board_id, current_phase_name):
+                # Create completed list for this phase
+                get_or_create_list(board_id, completed_phase_name)
+                st.session_state.trello_status = f"✅ {current_phase_name} completed!"
+                
+                # Move to next phase
+                current_phase_index += 1
+                
+                if current_phase_index < len(sorted_phases):
+                    next_phase = sorted_phases[current_phase_index]
+                    next_phase_name = f"Phase {next_phase} - Not Started"
+                    
+                    # Add tasks for next phase
+                    add_tasks_from_allocation(board_id, phases[next_phase], next_phase_name)
+                    st.session_state.current_phase = next_phase
+                    st.session_state.trello_status = f"🎉 Started {next_phase_name}. Monitoring completion..."
+                else:
+                    st.session_state.trello_status = "🎉 All phases completed! Project finished."
+                    st.session_state.syncing = False
+                    st.session_state.current_phase = None
+                    return
+                
+                break  # Exit the inner while loop to start monitoring the next phase
+            
+            # Wait before checking again
+            time.sleep(120)  # Check every 2 minutes
+
 
 def sync_with_trello(parsed_data, tasks):
-    board_id = get_board_id()  
+    """Start Trello synchronization process"""
+    board_id = get_board_id()
     if not board_id:
         st.session_state.trello_status = "❌ Failed to find the Trello board. Make sure 'My Project Manager Crew' exists."
         st.session_state.syncing = False
         return
     
-    st.session_state.trello_status = f"✅ Connected to Trello board 'My Project Manager Crew'. Starting synchronization..."
+    st.session_state.trello_status = "✅ Connected to Trello board 'My Project Manager Crew'. Starting synchronization..."
     
-
+    # Parse tasks into phases
+    phases = parse_allocation_tasks(tasks)
+    st.session_state.phases = phases
+    
+    # Start background monitoring thread
     sync_thread = threading.Thread(
-        target=check_phase_1_completion_background,
-        args=(board_id, tasks),
+        target=check_phases_background,
+        args=(board_id, phases),
         daemon=True
     )
     sync_thread.start()
@@ -97,8 +147,6 @@ def sync_with_trello(parsed_data, tasks):
 if st.sidebar.button("Generate Project Plan"):
     result = run_crew_with_retry()
     if result:
-        st.write("Debug - Raw Result Structure:", result)
-
         raw_alloc = None
         if "tasks_output" in result and isinstance(result["tasks_output"], list):
             for task_output in result["tasks_output"]:
@@ -152,10 +200,21 @@ if st.sidebar.button("Generate Project Plan"):
             st.write("Debug - Full result object:", result)
 
 
+# Display Trello synchronization status
 if st.session_state.syncing:
     st.subheader("🔄 Trello Synchronization Status")
     st.info(st.session_state.trello_status)
     
-
+    # Show current phase information if available
+    if st.session_state.current_phase and st.session_state.phases:
+        current_phase = st.session_state.current_phase
+        phase_tasks = st.session_state.phases.get(current_phase, [])
+        
+        st.subheader(f"Current Phase: {current_phase}")
+        if phase_tasks:
+            st.write(f"Tasks in this phase: {len(phase_tasks)}")
+            for task in phase_tasks:
+                st.write(f"- {task.get('task_name')} (Assigned to: {task.get('assigned_to')})")
+    
     if st.button("Refresh Status"):
         st.rerun()
