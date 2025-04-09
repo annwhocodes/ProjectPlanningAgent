@@ -2,6 +2,13 @@ import time
 import threading
 import streamlit as st
 import json
+from crewai import Agent
+from crewai import LLM 
+from litellm import completion
+from typing import Optional, List, Any
+import os
+from dotenv import load_dotenv
+from config_loader import agents_config, tasks_config
 from trello_utils import (
     get_board_id,
     load_tasks_from_json,
@@ -10,15 +17,59 @@ from trello_utils import (
     check_phase_completion,
     get_or_create_list
 )
-from agents import save_allocation_to_json
+from agents import project_planning_agent, estimation_agent, resource_allocation_agent, save_allocation_to_json
 from crew_definition import crew
 from crew_input import inputs
 from litellm.exceptions import RateLimitError
 from parse_allocation import parse_allocation_plan
 
+# Load environment variables
+load_dotenv()
+api_key = os.getenv("GOOGLE_API_KEY")
+
+if not api_key:
+    raise ValueError("❌ GOOGLE_API_KEY is missing! Check your .env file.")
+
+class GeminiWrapperLLM(LLM):
+    def __init__(self, api_key: str, model: str = "gemini/gemini-1.5-flash"):
+        super().__init__(model=model)
+        self.api_key = api_key
+        os.environ["GOOGLE_API_KEY"] = api_key  # Set for LiteLLM compatibility
+
+    @property
+    def supports_stop_words(self) -> bool:
+        return False  # Gemini doesn't support stop words
+
+    def generate_response(self, prompt: str, **kwargs) -> str:
+        try:
+            response = completion(
+                model=self.model,
+                messages=[{"content": prompt, "role": "user"}],
+                api_key=self.api_key,
+                temperature=0.7,
+                max_tokens=2000,
+                **kwargs
+            )
+            return response.choices[0].message.content
+        except RateLimitError as e:
+            st.error("⚠️ API rate limit exceeded. Please try again later.")
+            return f"Rate limit error: {str(e)}"
+        except Exception as e:
+            st.error(f"❌ Gemini API Error: {str(e)}")
+            return f"API error: {str(e)}"
+
+# Initialize the LLM with Gemini Flash 2.0
+llm = GeminiWrapperLLM(
+    api_key=api_key,
+    model="gemini/gemini-1.5-flash"
+)
+
+# Streamlit page setup
 st.set_page_config(page_title="Project Planner AI", layout="wide")
 st.title("🛠️ AI-Powered Project Planner")
 st.markdown("Use AI to generate a structured project plan and track it on Trello.")
+
+
 
 # Initialize session state variables
 if 'trello_status' not in st.session_state:
@@ -29,6 +80,7 @@ if 'current_phase' not in st.session_state:
     st.session_state.current_phase = None
 if 'phases' not in st.session_state:
     st.session_state.phases = {}
+
 
 # Sidebar for Project Details
 st.sidebar.header("Project Details")

@@ -1,54 +1,78 @@
-# parse_allocation.py
 import re
-import json
 
 def parse_allocation_plan(text):
-    parsed = {"phases": []}
+    """Parse the allocation plan text into a structured format."""
+    
+    # Initialize the result structure
+    result = {
+        "phases": []
+    }
+    
+    # Split the text into lines
+    lines = text.strip().split('\n')
+    
     current_phase = None
+    current_task = None
     
-    lines = [line.strip() for line in text.split('\n') if line.strip()]
-    
+    # Process each line
     for line in lines:
-        # Match phase headers (e.g., "**Phase 1: Planning and Analysis**")
-        phase_match = re.match(r'\*\*Phase (\d+): (.+)\*\*', line)
+        line = line.strip()
+        
+        # Skip empty lines
+        if not line:
+            continue
+        
+        # Check if it's a phase header
+        phase_match = re.match(r'^##\s+Phase\s+(\d+):\s+(.+)$', line)
         if phase_match:
+            phase_number = phase_match.group(1)
+            phase_name = phase_match.group(2)
             current_phase = {
-                "phase_number": int(phase_match.group(1)),
-                "phase_name": phase_match.group(2),
+                "phase_number": phase_number,
+                "phase_name": phase_name,
                 "tasks": []
             }
-            parsed["phases"].append(current_phase)
+            result["phases"].append(current_phase)
             continue
         
-        # Match task lines (e.g., "* Task 1.1: Define project scope...")
-        task_match = re.match(r'\* Task (\d+\.\d+): (.+)', line)
-        if task_match and current_phase:
-            task = {
-                "task_id": task_match.group(1),
-                "task_name": task_match.group(2),
+        # Check if it's a task header
+        task_match = re.match(r'^\*\s+Task\s+(\d+\.\d+):\s+(.+)$', line)
+        if task_match and current_phase is not None:
+            task_id = task_match.group(1)
+            task_name = task_match.group(2)
+            current_task = {
+                "task_id": task_id,
+                "task_name": task_name,
                 "assigned_to": [],
-                "duration": None,
-                "resources": []
+                "duration": "",
+                "resources": [],
+                "dependencies": []
             }
-            current_phase["tasks"].append(task)
+            current_phase["tasks"].append(current_task)
             continue
         
-        # Match assignment lines (e.g., "+ Assigned to: Rachel (Project Manager)...")
-        assigned_match = re.match(r'\+ Assigned to: (.+)', line)
-        if assigned_match and current_phase and current_phase["tasks"]:
-            # Get the last added task
-            current_task = current_phase["tasks"][-1]
-            # Split multiple assignees
-            assignees = [a.strip() for a in assigned_match.group(1).split(' and ')]
-            current_task["assigned_to"].extend(assignees)
-            continue
-        
-        # Match duration lines (e.g., "+ Estimated time: 2 days")
-        duration_match = re.match(r'\+ Estimated time: (\d+ days?)', line)
-        if duration_match and current_phase and current_phase["tasks"]:
-            current_task = current_phase["tasks"][-1]
-            current_task["duration"] = duration_match.group(1)
+        # Check for task details
+        if current_task is not None:
+            # Handle assigned to
+            if line.startswith('* Assigned to:'):
+                assigned_to = line.replace('* Assigned to:', '').strip()
+                current_task["assigned_to"] = [name.strip() for name in assigned_to.split(',')]
+            
+            # Handle duration
+            elif line.startswith('* Duration:'):
+                duration = line.replace('* Duration:', '').strip()
+                current_task["duration"] = duration
+            
+            # Handle resources
+            elif line.startswith('* Resources:'):
+                resources = line.replace('* Resources:', '').strip()
+                if resources:
+                    current_task["resources"] = [res.strip() for res in resources.split(',')]
+            
+            # Handle dependencies
+            elif line.startswith('* Dependencies:'):
+                dependencies = line.replace('* Dependencies:', '').strip()
+                if dependencies:
+                    current_task["dependencies"] = [dep.strip() for dep in dependencies.split(',')]
     
-    print("Parsed JSON Object:", json.dumps(parsed, indent=2))
-    
-    return parsed
+    return result

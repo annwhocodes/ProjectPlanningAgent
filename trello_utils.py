@@ -4,6 +4,7 @@ import json
 import time
 from dotenv import load_dotenv
 import datetime
+import re
 
 load_dotenv()
 
@@ -102,7 +103,7 @@ def create_card(list_id, task_name, description, assigned_to=None):
         "desc": description,
         "due": due_date
     }
-    
+
     response = requests.post(url, params=params)
     print(f"🔹 Trello API Status Code: {response.status_code}")
     
@@ -112,15 +113,29 @@ def create_card(list_id, task_name, description, assigned_to=None):
     
     try:
         card = response.json()
-        
-        # Assign the card to a member if provided
         if assigned_to and card.get("id"):
-            assign_member_to_card(card.get("id"), assigned_to)
+            # Get board members
+            members = get_board_members(get_board_id())
+            member_id = None
             
+            # Look for member by partial name match (case insensitive)
+            assigned_to_lower = assigned_to.lower()
+            for username, user_id in members.items():
+                if assigned_to_lower in username.lower():
+                    member_id = user_id
+                    print(f"✅ Found member match: {username} for {assigned_to}")
+                    break
+
+            if member_id:
+                assign_member_to_card(card.get("id"), member_id)
+            else:
+                print(f"⚠️ No member found matching '{assigned_to}'")
+
         return card
     except requests.exceptions.JSONDecodeError:
         print("❌ Trello API returned an empty or invalid response.")
         return None
+
 
 
 def assign_member_to_card(card_id, member_id):
@@ -159,10 +174,21 @@ def save_tasks_to_json(task_list):
         print(f"❌ Error saving allocation to JSON: {str(e)}")
 
 
+# In trello_utils.py, modify the load_tasks_from_json function
+
 def load_tasks_from_json():
     if os.path.exists(JSON_FILE):
         with open(JSON_FILE, "r") as f:
-            return json.load(f).get("tasks", [])
+            data = json.load(f)
+            # Return either the flat tasks list or extract from phases
+            if "tasks" in data:
+                return data.get("tasks", [])
+            else:
+                # Extract from phases for backward compatibility
+                tasks = []
+                for phase in data.get("phases", []):
+                    tasks.extend(phase.get("tasks", []))
+                return tasks
     print("⚠️ No tasks found in JSON file.")
     return []
 
@@ -174,17 +200,18 @@ def parse_allocation_tasks(tasks):
     for task in tasks:
         phase_str = task.get("phase", "")
         # Extract phase number
-        phase_num = ""
-        for char in phase_str:
-            if char.isdigit():
-                phase_num += char
-            else:
-                break
-                
-        if phase_num:
+        phase_match = re.match(r'(\d+)\.?.*', phase_str)
+        
+        if phase_match:
+            phase_num = phase_match.group(1)
             if phase_num not in phases:
                 phases[phase_num] = []
             phases[phase_num].append(task)
+        else:
+            # Fallback for tasks without a proper phase number
+            if "0" not in phases:
+                phases["0"] = []
+            phases["0"].append(task)
     
     return phases
 
@@ -257,13 +284,11 @@ def check_phase_completion(board_id, phase_list_name):
 def check_and_add_tasks():
     board_id = get_board_id()
     
-    # Load tasks from JSON
     tasks = load_tasks_from_json()
     
-    # Parse tasks into multiple phases
+
     phases = parse_allocation_tasks(tasks)
-    
-    # Sort phases by number to ensure sequential processing
+
     sorted_phases = sorted(phases.keys(), key=int)
     
     current_phase_index = 0
@@ -299,7 +324,7 @@ def check_and_add_tasks():
                 break
             
             print(f"⚠️ Tasks in {current_phase_name} are not completed yet.")
-            time.sleep(120)  # Check every 2 minutes
+            time.sleep(120) 
 
 if __name__ == "__main__":
     check_and_add_tasks()

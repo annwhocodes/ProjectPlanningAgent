@@ -2,13 +2,74 @@ task_breakdown:
   description: "Analyze the project requirements and break the website project into structured phases."
   agent: "project_planning_agent"
   expected_output: "A structured breakdown of website development tasks."
+  output_pydantic: "ProjectPlanOutput"
 
 time_resource_estimation:
   description: "Estimate the time and resources needed for each task."
   agent: "estimation_agent"
   expected_output: "Estimated time and required resources for each project phase."
+  output_pydantic: "ProjectPlanOutput"
 
 resource_allocation:
-  description: "Assign personnel and technical resources to the identified tasks."
+  description: |
+    Create a detailed resource allocation plan for the website development project using the provided information:
+
+    PROJECT DETAILS:
+    - Project Type: {project_type}
+    - Industry: {industry}
+    - Objectives: {project_objectives}
+    - Team Members: {team_members}
+    - Specific Requirements: {project_requirements}
+
+    Your allocation plan must:
+    1. Use the EXACT team members provided in the input (John Doe, Jane Doe, Bob Smith, Alice Johnson, Tom Brown)
+    2. Include ALL standard website development phases:
+       - Requirements gathering and analysis
+       - Site mapping and wireframing
+       - UI/UX design 
+       - Content creation
+       - Front-end development
+       - Back-end development
+       - Database implementation
+       - Testing and QA
+       - Deployment
+       - Post-launch support
+
+    3. Match tasks to team members based on their roles:
+       - John Doe (Project Manager) for coordination and planning tasks
+       - Jane Doe (Software Engineer) for development tasks
+       - Bob Smith (Designer) for UI/UX and design tasks
+       - Alice Johnson (QA Engineer) for testing tasks
+       - Tom Brown (QA Engineer) for testing tasks
+
+    4. Address the SPECIFIC requirements mentioned in the project input:
+       - Responsive design (mobile/desktop)
+       - Modern user interface
+       - User-friendly navigation
+       - About Us page
+       - Services page
+       - Blog section
+       - Fast loading and SEO optimization
+
+    FORMAT YOUR RESPONSE AS:
+    ```
+    # Resource Allocation Plan for {project_type} Project
+
+    ## Phase 1: [Phase Name]
+    ### Task 1.1: [Task Name]
+    - **Assigned to**: [Team Member Name(s)]
+    - **Duration**: [X days/weeks]
+    - **Resources needed**: [List of resources]
+    - **Dependencies**: [List any dependent tasks]
+
+    ### Task 1.2: [Task Name]
+    [... same structure as above]
+
+    ## Phase 2: [Phase Name]
+    [... continue pattern for all phases]
+    ```
+
+    Ensure each team member is utilized according to their skills, and all website requirements are addressed in the allocation plan.
   agent: "resource_allocation_agent"
-  expected_output: "A resource allocation plan mapping team members to tasks."
+  expected_output: "A complete, phased resource allocation plan that assigns website development tasks to specific team members with realistic timelines."
+  output_pydantic: "ProjectPlanOutput"
