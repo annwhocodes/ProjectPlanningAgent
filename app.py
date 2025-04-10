@@ -34,11 +34,11 @@ class GeminiWrapperLLM(LLM):
     def __init__(self, api_key: str, model: str = "gemini/gemini-1.5-flash"):
         super().__init__(model=model)
         self.api_key = api_key
-        os.environ["GOOGLE_API_KEY"] = api_key  # Set for LiteLLM compatibility
+        os.environ["GOOGLE_API_KEY"] = api_key  
 
     @property
     def supports_stop_words(self) -> bool:
-        return False  # Gemini doesn't support stop words
+        return False  
 
     def generate_response(self, prompt: str, **kwargs) -> str:
         try:
@@ -58,20 +58,20 @@ class GeminiWrapperLLM(LLM):
             st.error(f"❌ Gemini API Error: {str(e)}")
             return f"API error: {str(e)}"
 
-# Initialize the LLM with Gemini Flash 2.0
+
 llm = GeminiWrapperLLM(
     api_key=api_key,
     model="gemini/gemini-1.5-flash"
 )
 
-# Streamlit page setup
+
 st.set_page_config(page_title="Project Planner AI", layout="wide")
 st.title("🛠️ AI-Powered Project Planner")
 st.markdown("Use AI to generate a structured project plan and track it on Trello.")
 
 
 
-# Initialize session state variables
+
 if 'trello_status' not in st.session_state:
     st.session_state.trello_status = ""
 if 'syncing' not in st.session_state:
@@ -82,7 +82,7 @@ if 'phases' not in st.session_state:
     st.session_state.phases = {}
 
 
-# Sidebar for Project Details
+
 st.sidebar.header("Project Details")
 inputs["project_type"] = st.sidebar.text_input("Project Type", value=inputs["project_type"])
 inputs["project_objectives"] = st.sidebar.text_area("Project Objectives", value=inputs["project_objectives"])
@@ -90,7 +90,7 @@ inputs["industry"] = st.sidebar.text_input("Industry", value=inputs["industry"])
 inputs["team_members"] = st.sidebar.text_area("Team Members", value=inputs["team_members"])
 inputs["project_requirements"] = st.sidebar.text_area("Project Requirements", value=inputs["project_requirements"])
 
-# Function to run Crew with retry logic for rate limits
+
 def run_crew_with_retry():
     retries = 3
     for attempt in range(retries):
@@ -111,7 +111,7 @@ def run_crew_with_retry():
 
 def check_phases_background(board_id, phases):
     """Background thread to monitor phase completion and add new phases sequentially"""
-    # Get sorted phase numbers
+
     sorted_phases = sorted(phases.keys(), key=int)
     
     if not sorted_phases:
@@ -119,45 +119,44 @@ def check_phases_background(board_id, phases):
         st.session_state.syncing = False
         return
     
-    # Start with the first phase
+
     current_phase_index = 0
     
-    # Add first phase tasks to Trello
+
     current_phase = sorted_phases[current_phase_index]
     current_phase_name = f"Phase {current_phase} - Not Started"
     
-    # Store current phase in session state for display
+
     st.session_state.current_phase = current_phase
     
-    # Add tasks for first phase
+ 
     add_tasks_from_allocation(board_id, phases[current_phase], current_phase_name)
     st.session_state.trello_status = f"✅ {current_phase_name} tasks added to Trello. Monitoring completion..."
     
-    # Process phases sequentially
+
     while current_phase_index < len(sorted_phases):
         current_phase = sorted_phases[current_phase_index]
         current_phase_name = f"Phase {current_phase} - Not Started"
         completed_phase_name = f"Phase {current_phase} - Completed"
         
-        # Update session state
+
         st.session_state.current_phase = current_phase
         st.session_state.trello_status = f"🔍 Monitoring completion of {current_phase_name}. Checking every 2 minutes..."
         
-        # Wait until current phase is complete
+
         while True:
             if check_phase_completion(board_id, current_phase_name):
-                # Create completed list for this phase
                 get_or_create_list(board_id, completed_phase_name)
                 st.session_state.trello_status = f"✅ {current_phase_name} completed!"
                 
-                # Move to next phase
+             
                 current_phase_index += 1
                 
                 if current_phase_index < len(sorted_phases):
                     next_phase = sorted_phases[current_phase_index]
                     next_phase_name = f"Phase {next_phase} - Not Started"
                     
-                    # Add tasks for next phase
+              
                     add_tasks_from_allocation(board_id, phases[next_phase], next_phase_name)
                     st.session_state.current_phase = next_phase
                     st.session_state.trello_status = f"🎉 Started {next_phase_name}. Monitoring completion..."
@@ -167,10 +166,10 @@ def check_phases_background(board_id, phases):
                     st.session_state.current_phase = None
                     return
                 
-                break  # Exit the inner while loop to start monitoring the next phase
+                break  
             
-            # Wait before checking again
-            time.sleep(120)  # Check every 2 minutes
+
+            time.sleep(120)  
 
 
 def sync_with_trello(parsed_data, tasks):
@@ -183,11 +182,11 @@ def sync_with_trello(parsed_data, tasks):
     
     st.session_state.trello_status = "✅ Connected to Trello board 'My Project Manager Crew'. Starting synchronization..."
     
-    # Parse tasks into phases
+
     phases = parse_allocation_tasks(tasks)
     st.session_state.phases = phases
     
-    # Start background monitoring thread
+
     sync_thread = threading.Thread(
         target=check_phases_background,
         args=(board_id, phases),
@@ -198,7 +197,7 @@ def sync_with_trello(parsed_data, tasks):
 
 def ensure_fields_present(task):
     """Ensure all required fields are present in task data, with proper formatting"""
-    # Make sure assigned_to is always a string
+
     if "assigned_to" in task:
         if isinstance(task["assigned_to"], list):
             task["assigned_to"] = ", ".join(task["assigned_to"])
@@ -207,11 +206,11 @@ def ensure_fields_present(task):
     else:
         task["assigned_to"] = "Unassigned"
     
-    # Make sure duration exists
+
     if "duration" not in task or not task["duration"]:
         task["duration"] = "N/A"
     
-    # Ensure resources field exists
+
     if "resources" not in task or not task["resources"]:
         task["resources"] = []
     
@@ -234,12 +233,12 @@ if st.sidebar.button("Generate Project Plan"):
             parsed_data = parse_allocation_plan(raw_alloc)
             tasks = []
             
-            # Debug - log parsed data structure
+
             st.write("Debug - Parsed data structure:", parsed_data)
             
             for phase in parsed_data.get("phases", []):
                 for task in phase.get("tasks", []):
-                    # Ensure all fields are present with proper formatting
+    
                     task = ensure_fields_present(task)
                     
                     tasks.append({
@@ -250,7 +249,6 @@ if st.sidebar.button("Generate Project Plan"):
                         "phase": f"{phase.get('phase_number', '0')}. {phase.get('phase_name', 'Unnamed Phase')}"
                     })
 
-            # Add debug logging for tasks
             st.write("Debug - Tasks before saving:", tasks)
             
             save_allocation_to_json(tasks)
@@ -283,12 +281,10 @@ if st.sidebar.button("Generate Project Plan"):
             st.write("Debug - Full result object:", result)
 
 
-# Display Trello synchronization status
 if st.session_state.syncing:
     st.subheader("🔄 Trello Synchronization Status")
     st.info(st.session_state.trello_status)
     
-    # Show current phase information if available
     if st.session_state.current_phase and st.session_state.phases:
         current_phase = st.session_state.current_phase
         phase_tasks = st.session_state.phases.get(current_phase, [])

@@ -1,285 +1,271 @@
 [
     {
         "task_name": "1.1 - Define Project Scope and Objectives",
-        "assigned_to": "John Doe (Project Manager)",
+        "assigned_to": "John Doe",
         "duration": "1 day",
         "resources": [
-            "Project Management Software",
-            "Documentation Templates"
+            "Project documentation templates"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
         "task_name": "1.2 - Conduct Stakeholder Analysis",
-        "assigned_to": "John Doe (Project Manager)",
+        "assigned_to": "John Doe",
         "duration": "1 day",
         "resources": [
-            "Stakeholder Register Template",
-            "Communication Tools"
+            "Stakeholder list",
+            "communication channels"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
         "task_name": "1.3 - Competitive Analysis",
-        "assigned_to": "John Doe (Project Manager)",
+        "assigned_to": "John Doe, Bob Smith",
         "duration": "2 days",
         "resources": [
-            "Market Research Tools",
-            "Competitor Website List"
+            "Access to competitor websites",
+            "market research tools"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
         "task_name": "1.4 - Content Strategy Planning",
-        "assigned_to": "John Doe (Project Manager), Bob Smith (Designer)",
+        "assigned_to": "John Doe, Bob Smith",
         "duration": "2 days",
         "resources": [
-            "Content Calendar Template",
-            "Content Management System (CMS) knowledge"
+            "Content calendar template",
+            "style guide"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
         "task_name": "1.5 - Technology Stack Selection",
-        "assigned_to": "Jane Doe (Software Engineer), John Doe (Project Manager)",
+        "assigned_to": "John Doe, Piyush Lavaniya, Jane Doe, Alice Johnson",
         "duration": "1 day",
         "resources": [
-            "Technology Stack Comparison Documents"
+            "Technology comparison documents"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
         "task_name": "1.6 - Project Timeline & Budget Creation",
-        "assigned_to": "John Doe (Project Manager)",
+        "assigned_to": "John Doe",
         "duration": "2 days",
         "resources": [
-            "Project Management Software",
-            "Budgeting Software"
+            "Project management software"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
         "task_name": "1.7 - Risk Assessment & Mitigation Planning",
-        "assigned_to": "John Doe (Project Manager)",
+        "assigned_to": "John Doe",
         "duration": "1 day",
         "resources": [
-            "Risk Register Template"
+            "Risk assessment template"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
         "task_name": "1.8 - Project Kick-off Meeting",
-        "assigned_to": "John Doe (Project Manager)",
+        "assigned_to": "John Doe",
         "duration": "1 day",
         "resources": [
-            "Meeting Room",
-            "Presentation Software"
+            "Meeting room",
+            "presentation materials"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
         "task_name": "2.1 - Wireframing",
-        "assigned_to": "Bob Smith (Designer)",
+        "assigned_to": "Bob Smith",
         "duration": "3 days",
         "resources": [
-            "Wireframing Software (e.g.",
-            "Figma",
-            "Balsamiq)"
+            "Wireframing software"
         ],
         "phase": "2. Design & Prototyping"
     },
     {
         "task_name": "2.2 - UI Design",
-        "assigned_to": "Bob Smith (Designer)",
+        "assigned_to": "Bob Smith",
         "duration": "5 days",
         "resources": [
-            "Design Software (e.g.",
-            "Adobe XD",
-            "Sketch)",
-            "Design System Documentation"
+            "Design software (Figma",
+            "Adobe XD)"
         ],
         "phase": "2. Design & Prototyping"
     },
     {
         "task_name": "2.3 - UX Design & User Testing",
-        "assigned_to": "Bob Smith (Designer)",
+        "assigned_to": "Bob Smith, John Doe",
         "duration": "5 days",
         "resources": [
-            "User Testing Platforms (e.g.",
-            "UserTesting.com)",
-            "Prototyping Software"
+            "User testing platform",
+            "feedback collection tools"
         ],
         "phase": "2. Design & Prototyping"
     },
     {
         "task_name": "2.4 - Prototype Development",
-        "assigned_to": "Jane Doe (Software Engineer), Bob Smith (Designer)",
+        "assigned_to": "Piyush Lavaniya, Jane Doe, Alice Johnson",
         "duration": "5 days",
         "resources": [
-            "Prototyping Software (e.g.",
-            "InVision",
-            "Figma)"
+            "Prototyping tools"
         ],
         "phase": "2. Design & Prototyping"
     },
     {
         "task_name": "2.5 - Design Review & Approval",
-        "assigned_to": "John Doe (Project Manager), Bob Smith (Designer)",
+        "assigned_to": "John Doe, Bob Smith",
         "duration": "2 days",
         "resources": [
-            "Meeting Room",
-            "Presentation Software"
+            "Presentation materials",
+            "feedback collection tools"
         ],
         "phase": "2. Design & Prototyping"
     },
     {
         "task_name": "3.1 - Front-End Development",
-        "assigned_to": "Jane Doe (Software Engineer)",
+        "assigned_to": "Jane Doe",
         "duration": "3 weeks",
         "resources": [
-            "Code Editor",
-            "Version Control System (e.g.",
-            "Git)"
+            "Development environment",
+            "code repository"
         ],
         "phase": "3. Development"
     },
     {
         "task_name": "3.2 - Back-End Development",
-        "assigned_to": "Jane Doe (Software Engineer)",
+        "assigned_to": "Piyush Lavaniya, Alice Johnson",
         "duration": "3 weeks",
         "resources": [
-            "Code Editor",
-            "Version Control System (e.g.",
-            "Git)",
-            "Database Management System"
+            "Development environment",
+            "database server"
         ],
         "phase": "3. Development"
     },
     {
         "task_name": "3.3 - Content Integration",
-        "assigned_to": "Jane Doe (Software Engineer)",
+        "assigned_to": "Jane Doe",
         "duration": "2 weeks",
         "resources": [
-            "CMS",
-            "Content Library"
+            "Content management system (CMS)"
         ],
         "phase": "3. Development"
     },
     {
-        "task_name": "3.4 - API Integration",
-        "assigned_to": "Jane Doe (Software Engineer)",
-        "duration": "1 week",
+        "task_name": "3.4 - AI Chatbot Integration",
+        "assigned_to": "Piyush Lavaniya, Jane Doe, Alice Johnson",
+        "duration": "4 weeks",
         "resources": [
-            "API Documentation",
-            "Testing Tools"
+            "AI development tools",
+            "APIs"
         ],
         "phase": "3. Development"
     },
     {
         "task_name": "4.1 - Unit Testing",
-        "assigned_to": "Alice Johnson (QA Engineer), Tom Brown (QA Engineer), Jane Doe (Software Engineer)",
+        "assigned_to": "Tom Brown, Alice Johnson",
         "duration": "1 week",
         "resources": [
-            "Testing Frameworks",
-            "Bug Tracking System"
+            "Testing framework",
+            "test data"
         ],
         "phase": "4. Testing & Quality Assurance"
     },
     {
         "task_name": "4.2 - Integration Testing",
-        "assigned_to": "Alice Johnson (QA Engineer), Tom Brown (QA Engineer)",
+        "assigned_to": "Tom Brown, Alice Johnson",
         "duration": "1 week",
         "resources": [
-            "Testing Frameworks",
-            "Bug Tracking System"
+            "Testing framework",
+            "test data"
         ],
         "phase": "4. Testing & Quality Assurance"
     },
     {
         "task_name": "4.3 - User Acceptance Testing",
-        "assigned_to": "Alice Johnson (QA Engineer), Tom Brown (QA Engineer), John Doe (Project Manager)",
+        "assigned_to": "John Doe, Tom Brown",
         "duration": "1 week",
         "resources": [
-            "Testing Environment",
-            "Feedback Collection Tools"
+            "UAT environment",
+            "feedback collection tools"
         ],
         "phase": "4. Testing & Quality Assurance"
     },
     {
         "task_name": "4.4 - Bug Fixing & Refinement",
-        "assigned_to": "Jane Doe (Software Engineer), Alice Johnson (QA Engineer), Tom Brown (QA Engineer)",
+        "assigned_to": "Piyush Lavaniya, Jane Doe, Alice Johnson, Tom Brown",
         "duration": "1 week",
         "resources": [
-            "Bug Tracking System",
-            "Code Editor"
+            "Bug tracking system"
         ],
         "phase": "4. Testing & Quality Assurance"
     },
     {
         "task_name": "5.1 - Deployment to Production Server",
-        "assigned_to": "Jane Doe (Software Engineer)",
+        "assigned_to": "Piyush Lavaniya, Jane Doe",
         "duration": "2 days",
         "resources": [
-            "Server Access",
-            "Deployment Scripts"
+            "Production server access",
+            "deployment scripts"
         ],
         "phase": "5. Deployment & Launch"
     },
     {
         "task_name": "5.2 - Post-Launch Monitoring",
-        "assigned_to": "Jane Doe (Software Engineer)",
+        "assigned_to": "John Doe, Tom Brown",
         "duration": "2 days",
         "resources": [
-            "Monitoring Tools",
-            "Alerting Systems"
+            "Monitoring tools"
         ],
         "phase": "5. Deployment & Launch"
     },
     {
         "task_name": "5.3 - Final Stakeholder Review",
-        "assigned_to": "John Doe (Project Manager)",
+        "assigned_to": "John Doe",
         "duration": "1 day",
         "resources": [
-            "Meeting Room",
-            "Presentation Software"
+            "Meeting room",
+            "presentation materials"
         ],
         "phase": "5. Deployment & Launch"
     },
     {
         "task_name": "5.4 - Documentation & Handover",
-        "assigned_to": "John Doe (Project Manager)",
+        "assigned_to": "John Doe",
         "duration": "2 days",
         "resources": [
-            "Documentation Templates"
+            "Documentation templates"
         ],
         "phase": "5. Deployment & Launch"
     },
     {
-        "task_name": "6.1 - Ongoing Monitoring & Maintenance",
-        "assigned_to": "Jane Doe (Software Engineer)",
+        "task_name": "6.1 - Ongoing Maintenance & Updates",
+        "assigned_to": "Jane Doe, Piyush Lavaniya",
         "duration": "Ongoing",
         "resources": [
-            "Monitoring Tools",
-            "Alerting Systems"
+            "Monitoring tools",
+            "update procedures"
         ],
-        "phase": "6. Post-Launch Support & Maintenance"
+        "phase": "6. Post-launch Support & Maintenance"
     },
     {
-        "task_name": "6.2 - Security Updates",
-        "assigned_to": "Jane Doe (Software Engineer)",
+        "task_name": "6.2 - Security Monitoring & Updates",
+        "assigned_to": "Piyush Lavaniya, Alice Johnson",
         "duration": "Ongoing",
         "resources": [
-            "Security Patch Management Tools"
+            "Security monitoring tools",
+            "vulnerability scanners"
         ],
-        "phase": "6. Post-Launch Support & Maintenance"
+        "phase": "6. Post-launch Support & Maintenance"
     },
     {
-        "task_name": "6.3 - Content Updates",
-        "assigned_to": "John Doe (Project Manager)",
+        "task_name": "6.3 - Performance Monitoring & Optimization",
+        "assigned_to": "Jane Doe, Tom Brown",
         "duration": "Ongoing",
         "resources": [
-            "CMS"
+            "Performance monitoring tools"
         ],
-        "phase": "6. Post-Launch Support & Maintenance"
+        "phase": "6. Post-launch Support & Maintenance"
     }
 ]

@@ -71,7 +71,7 @@ def search_trello_members(query):
         "key": TRELLO_API_KEY,
         "token": TRELLO_OAUTH_TOKEN,
         "query": query,
-        "limit": 5  # Limit results to avoid too many hits
+        "limit": 5  
     }
     response = requests.get(url, params=params)
     if response.status_code == 200:
@@ -82,19 +82,62 @@ def search_trello_members(query):
 
 def get_member_id_by_username(username):
     """Get Trello member ID by username."""
-    # Special case: Check if username contains "John Doe" and handle it specifically
     if "john doe" in username.lower() or "johndoe" in username.lower():
-        # Search for John Doe instead of using a hardcoded ID
         members = search_trello_members("John Doe")
         if members:
             for member in members:
                 if "john" in member.get("username", "").lower() or "john" in member.get("fullName", "").lower():
                     print(f"✅ Found John Doe: {member.get('fullName')} ({member.get('username')})")
-                    return member.get("id")  # Return the actual ID, not username
+                    return member.get("id")  
         
-        # Fallback if search fails
         print("⚠️ Using fallback for John Doe")
-        return "johndoe892004"  # Make sure this is the actual member ID, not username
+        return "johndoe892004"  
+    
+    # Special case for Bob Smith
+    elif "bob smith" in username.lower() or "bobsmith" in username.lower():
+        url = f"{BASE_URL}/members/bobsmith892004"
+        query = {
+            "key": TRELLO_API_KEY,
+            "token": TRELLO_OAUTH_TOKEN
+        }
+        response = requests.get(url, params=query)
+        if response.status_code == 200:
+            print(f"✅ Found Bob Smith via direct lookup")
+            return response.json().get("id")
+        
+        members = search_trello_members("Bob Smith")
+        if members:
+            for member in members:
+                if "bob" in member.get("username", "").lower() or "bob" in member.get("fullName", "").lower():
+                    print(f"✅ Found Bob Smith: {member.get('fullName')} ({member.get('username')})")
+                    return member.get("id")
+        
+        print("⚠️ Using fallback for Bob Smith")
+        return "bobsmith892004"
+    
+    # Special case
+    elif "piyush lavaniya" in username.lower() or "piyushlavaniya" in username.lower():
+        # First try direct lookup with the known username
+        url = f"{BASE_URL}/members/piyushlavaniya"
+        query = {
+            "key": TRELLO_API_KEY,
+            "token": TRELLO_OAUTH_TOKEN
+        }
+        response = requests.get(url, params=query)
+        if response.status_code == 200:
+            print(f"✅ Found Piyush Lavaniya via direct lookup")
+            return response.json().get("id")
+            
+        # If direct lookup fails, try searching
+        members = search_trello_members("Piyush Lavaniya")
+        if members:
+            for member in members:
+                if "piyush" in member.get("username", "").lower() or "piyush" in member.get("fullName", "").lower():
+                    print(f"✅ Found Piyush Lavaniya: {member.get('fullName')} ({member.get('username')})")
+                    return member.get("id")
+        
+        print("⚠️ Using fallback for Piyush Lavaniya")
+        return "piyushlavaniya"
         
     url = f"{BASE_URL}/members/{username}"
     query = {
@@ -105,7 +148,6 @@ def get_member_id_by_username(username):
     if response.status_code == 200:
         return response.json().get("id")
     
-    # If direct lookup fails, try searching
     members = search_trello_members(username)
     if members:
         for member in members:
@@ -139,7 +181,6 @@ def create_card(list_id, task_name, description, assigned_to=None):
     url = f"{BASE_URL}/cards"
     due_date = (datetime.datetime.now() + datetime.timedelta(days=7)).isoformat()
     
-    # Create description with task details including assigned person
     detailed_description = description
     if assigned_to:
         detailed_description += f"\n\nAssigned to: {assigned_to}"
@@ -166,51 +207,67 @@ def create_card(list_id, task_name, description, assigned_to=None):
         if assigned_to and card.get("id"):
             print(f"👤 Attempting to assign card to: {assigned_to}")
             
-            # Get board ID for adding members if needed
             board_id = get_board_id()
             
-            # First try to find member on the board
             board_members = get_board_members(board_id)
             member_id = None
             
-            # Check for John Doe case specifically
             if "john doe" in assigned_to.lower() or "johndoe" in assigned_to.lower():
                 print("🔍 Detected John Doe assignment")
-                # Try to find John Doe in board members first
                 for username, user_id in board_members.items():
                     if "john" in username.lower():
                         member_id = user_id
                         print(f"✅ Found John Doe in board members: {username}")
                         break
-                
-                # If not found in board members, get ID directly
+
                 if not member_id:
                     member_id = get_member_id_by_username("John Doe")
                     if member_id:
-                        # Add to board first before assigning to card
+                        add_member_to_board(board_id, member_id)
+            elif "bob smith" in assigned_to.lower() or "bobsmith" in assigned_to.lower():
+                print("🔍 Detected Bob Smith assignment")
+
+                for username, user_id in board_members.items():
+                    if "bob" in username.lower():
+                        member_id = user_id
+                        print(f"✅ Found Bob Smith in board members: {username}")
+                        break
+
+                if not member_id:
+                    member_id = get_member_id_by_username("Bob Smith")
+                    if member_id:
+                        add_member_to_board(board_id, member_id)
+            elif "piyush lavaniya" in assigned_to.lower() or "piyushlavaniya" in assigned_to.lower():
+                print("🔍 Detected Piyush Lavaniya assignment")
+                for username, user_id in board_members.items():
+                    if "piyush" in username.lower():
+                        member_id = user_id
+                        print(f"✅ Found Piyush Lavaniya in board members: {username}")
+                        break
+                
+                if not member_id:
+                    member_id = get_member_id_by_username("Piyush Lavaniya")
+                    if member_id:
                         add_member_to_board(board_id, member_id)
             else:
-                # For other members, try to find them in board members
                 for username, user_id in board_members.items():
                     if assigned_to.lower() in username.lower() or assigned_to.lower() in user_id.lower():
                         member_id = user_id
                         print(f"✅ Found board member match: {username}")
                         break
                 
-                # If not found in board members, look up by username
+
                 if not member_id:
                     member_id = get_member_id_by_username(assigned_to)
                     if member_id:
-                        # Add to board first
+                    
                         add_member_to_board(board_id, member_id)
-            
-            # Now assign to card
+
             if member_id:
                 success = assign_member_to_card(card.get("id"), member_id)
                 if not success:
                     print(f"⚠️ Failed to assign {assigned_to} to card, trying alternative approach")
-                    # Try an alternative approach with email if needed
-                    # This is just a placeholder for potential fallback options
+
             else:
                 print(f"⚠️ No member ID found for '{assigned_to}'")
         
@@ -249,14 +306,11 @@ def add_member_to_board(board_id, member_id):
 
 def add_member_to_board_and_card(board_id, card_id, username):
     """Add a member to board if not already a member, then assign to card."""
-    # Try to get member ID
     member_id = get_member_id_by_username(username)
     
     if member_id:
-        # Add to board first
         added_to_board = add_member_to_board(board_id, member_id)
         
-        # Then assign to card
         if added_to_board:
             return assign_member_to_card(card_id, member_id)
         else:
@@ -276,13 +330,11 @@ def assign_member_to_card(card_id, member_id):
         "value": member_id
     }
     
-    # Try POST first (for adding a member)
     response = requests.post(url, params=params)
     if response.status_code == 200:
         print(f"✅ Assigned member to card {card_id}")
         return True
     else:
-        # If POST fails, try PUT as an alternative
         put_response = requests.put(url, params=params)
         if put_response.status_code == 200:
             print(f"✅ Assigned member to card using PUT {card_id}")
@@ -318,16 +370,13 @@ def load_tasks_from_json():
             try:
                 data = json.load(f)
                 print(f"📚 Loaded task data from JSON: {JSON_FILE}")
-                # Debug: Print first few tasks to verify structure
                 tasks = data.get("tasks", [])
                 if tasks and len(tasks) > 0:
                     print(f"📝 First task sample: {tasks[0]}")
                 
-                # Return either the flat tasks list or extract from phases
                 if "tasks" in data:
                     return data.get("tasks", [])
                 else:
-                    # Extract from phases for backward compatibility
                     all_tasks = []
                     for phase in data.get("phases", []):
                         all_tasks.extend(phase.get("tasks", []))
@@ -347,7 +396,6 @@ def parse_allocation_tasks(tasks):
     
     for task in tasks:
         phase_str = task.get("phase", "")
-        # Extract phase number
         phase_match = re.match(r'(\d+)\.?.*', phase_str)
         
         if phase_match:
@@ -356,7 +404,6 @@ def parse_allocation_tasks(tasks):
                 phases[phase_num] = []
             phases[phase_num].append(task)
         else:
-            # Fallback for tasks without a proper phase number
             if "0" not in phases:
                 phases["0"] = []
             phases["0"].append(task)
@@ -374,7 +421,6 @@ def add_tasks_from_allocation(board_id, tasks, phase_list_name):
     
     for task in tasks:
         task_name = task.get("task_name")
-        # Create a detailed description from task data
         description = f"Task: {task_name}\n"
         if task.get("duration"):
             description += f"Duration: {task.get('duration')}\n"
@@ -445,19 +491,16 @@ def check_and_add_tasks():
         
         print(f"🔄 Working on {current_phase_name}")
         
-        # Add tasks for the current phase if they don't exist yet
         add_tasks_from_allocation(board_id, phases[current_phase], current_phase_name)
         
-        # Keep checking until current phase is complete
         while True:
             print(f"🔄 Checking if all tasks in {current_phase_name} are completed...")
             if check_phase_completion(board_id, current_phase_name):
                 print(f"✅ Tasks in {current_phase_name} completed.")
                 
-                # Move completed tasks to the completed list
                 completed_list_id = get_or_create_list(board_id, next_phase_name)
                 
-                # Move to next phase
+
                 current_phase_index += 1
                 
                 if current_phase_index < len(sorted_phases):
