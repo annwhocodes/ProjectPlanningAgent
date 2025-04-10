@@ -196,6 +196,28 @@ def sync_with_trello(parsed_data, tasks):
     sync_thread.start()
 
 
+def ensure_fields_present(task):
+    """Ensure all required fields are present in task data, with proper formatting"""
+    # Make sure assigned_to is always a string
+    if "assigned_to" in task:
+        if isinstance(task["assigned_to"], list):
+            task["assigned_to"] = ", ".join(task["assigned_to"])
+        elif task["assigned_to"] is None:
+            task["assigned_to"] = "Unassigned"
+    else:
+        task["assigned_to"] = "Unassigned"
+    
+    # Make sure duration exists
+    if "duration" not in task or not task["duration"]:
+        task["duration"] = "N/A"
+    
+    # Ensure resources field exists
+    if "resources" not in task or not task["resources"]:
+        task["resources"] = []
+    
+    return task
+
+
 if st.sidebar.button("Generate Project Plan"):
     result = run_crew_with_retry()
     if result:
@@ -212,16 +234,25 @@ if st.sidebar.button("Generate Project Plan"):
             parsed_data = parse_allocation_plan(raw_alloc)
             tasks = []
             
+            # Debug - log parsed data structure
+            st.write("Debug - Parsed data structure:", parsed_data)
+            
             for phase in parsed_data.get("phases", []):
                 for task in phase.get("tasks", []):
+                    # Ensure all fields are present with proper formatting
+                    task = ensure_fields_present(task)
+                    
                     tasks.append({
-                        "task_name": f"{task['task_id']} - {task['task_name']}",
-                        "assigned_to": ", ".join(task["assigned_to"]) if isinstance(task["assigned_to"], list) else task["assigned_to"],
+                        "task_name": f"{task.get('task_id', 'Task')} - {task.get('task_name', 'Unnamed Task')}",
+                        "assigned_to": task["assigned_to"],
                         "duration": task["duration"],
                         "resources": task.get("resources", []),
-                        "phase": f"{phase['phase_number']}. {phase['phase_name']}"
+                        "phase": f"{phase.get('phase_number', '0')}. {phase.get('phase_name', 'Unnamed Phase')}"
                     })
 
+            # Add debug logging for tasks
+            st.write("Debug - Tasks before saving:", tasks)
+            
             save_allocation_to_json(tasks)
 
             st.success("✅ Project Plan Generated!")
