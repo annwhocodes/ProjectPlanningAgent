@@ -2,29 +2,25 @@ from crewai import LLM
 from litellm import completion
 import os
 from typing import Optional
-# Turn on debug mode for LiteLLM
-import litellm
-litellm._turn_on_debug()
+
 
 class GeminiWrapperLLM(LLM):
     def __init__(self, api_key: str, model: str = "gemini/gemini-1.5-flash"):
         super().__init__(model=model)
-        # Set the environment variable
+    
         os.environ["GOOGLE_API_KEY"] = api_key
         self.api_key = api_key
         self.model = model
         self.temperature = 0
 
     def supports_stop_words(self) -> bool:
-        return False  # Gemini doesn't support stop words
+        return False  
 
     def generate_response(self, prompt: str, **kwargs) -> str:
         try:
-            # Make sure to properly format the model name for litellm
-            # litellm expects "google/gemini-1.5-flash" format instead of "gemini/gemini-1.5-flash"
             model = self.model
             if model.startswith("gemini/"):
-                model = "google/" + model[7:]  # Convert "gemini/gemini-1.5-flash" to "google/gemini-1.5-flash"
+                model = "google/" + model[7:] 
             
             response = completion(
                 model=model,
