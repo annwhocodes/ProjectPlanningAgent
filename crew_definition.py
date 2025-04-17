@@ -12,11 +12,11 @@ from config_loader import tasks_config
 crew = Crew(
     agents=[project_planning_agent, estimation_agent, resource_allocation_agent],
     tasks=[
-        tasks_config["task_breakdown"],
-        tasks_config["time_resource_estimation"],
-        tasks_config["resource_allocation"]
+        tasks["task_breakdown"],
+        tasks["time_resource_estimation"],
+        tasks["resource_allocation"]
     ],
-    verbose=2,
+    verbose=True,
     process=Process.sequential,
     memory=False
 )

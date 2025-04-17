@@ -1,6 +1,6 @@
-# BlueprintAI
+# BlueprintAI - Design your project like an architect – automate the blueprinting process with AI.
 
-BlueprintAI is an **AI-powered project planning assistant** that intelligently breaks down a website project into phases, estimates timelines and resources, and allocates team members to tasks. It then syncs everything with **Trello**, enabling streamlined tracking and real-time phase management.
+BlueprintAI is an **AI-powered project planning assistant** that intelligently breaks down a project into phases, estimates timelines and resources, and allocates team members to tasks. It then syncs everything with **Trello**, enabling streamlined tracking and real-time phase management.
 
 ## 🚀 Features
 

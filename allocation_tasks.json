@@ -1,11 +1,11 @@
 [
     {
         "task_name": "1.1 - Define Project Scope and Objectives",
-        "assigned_to": "John Doe (Project Manager), Client",
+        "assigned_to": "John Doe (Project Manager)",
         "duration": "1 day",
         "resources": [
-            "Project management software",
-            "client communication channels"
+            "Project Charter template",
+            "Client communication channels"
         ],
         "phase": "1. Project Initiation & Planning"
     },
@@ -14,8 +14,8 @@
         "assigned_to": "John Doe (Project Manager)",
         "duration": "1 day",
         "resources": [
-            "Stakeholder list",
-            "communication tools"
+            "Stakeholder list template",
+            "Communication tools"
         ],
         "phase": "1. Project Initiation & Planning"
     },
@@ -25,26 +25,26 @@
         "duration": "2 days",
         "resources": [
             "Internet access",
-            "competitor website list"
+            "Competitor website list"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
         "task_name": "1.4 - Content Strategy Planning",
-        "assigned_to": "John Doe (Project Manager), Bob Smith (Designer)",
+        "assigned_to": "John Doe (Project Manager)",
         "duration": "2 days",
         "resources": [
             "Content calendar template",
-            "brainstorming tools"
+            "Client input"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
         "task_name": "1.5 - Technology Stack Selection",
-        "assigned_to": "John Doe (Project Manager), Jane Doe (Software Engineer)",
+        "assigned_to": "Jane Doe (Software Engineer), John Doe (Project Manager)",
         "duration": "1 day",
         "resources": [
-            "Technology comparison documents"
+            "Technology research resources"
         ],
         "phase": "1. Project Initiation & Planning"
     },
@@ -54,7 +54,7 @@
         "duration": "2 days",
         "resources": [
             "Project management software",
-            "budget template"
+            "Budget template"
         ],
         "phase": "1. Project Initiation & Planning"
     },
@@ -68,151 +68,182 @@
         "phase": "1. Project Initiation & Planning"
     },
     {
-        "task_name": "1.8 - Team Formation & Roles Assignment",
+        "task_name": "1.8 - Project Kick-off Meeting",
         "assigned_to": "John Doe (Project Manager)",
         "duration": "1 day",
         "resources": [
-            "Team communication platform"
+            "Meeting room",
+            "Presentation materials"
         ],
         "phase": "1. Project Initiation & Planning"
     },
     {
-        "task_name": "2.1 - Wireframing & Prototyping",
+        "task_name": "2.1 - Wireframing",
         "assigned_to": "Bob Smith (Designer)",
         "duration": "3 days",
         "resources": [
-            "Wireframing software",
-            "prototyping tools"
+            "Wireframing software"
         ],
-        "phase": "2. Design & Development"
+        "phase": "2. Design & Prototyping"
     },
     {
-        "task_name": "2.2 - UI/UX Design",
+        "task_name": "2.2 - UI Design",
         "assigned_to": "Bob Smith (Designer)",
-        "duration": "7 days",
-        "resources": [
-            "Design software (Figma",
-            "Adobe XD)",
-            "style guide template"
-        ],
-        "phase": "2. Design & Development"
-    },
-    {
-        "task_name": "2.3 - Front-End Development",
-        "assigned_to": "Jane Doe (Software Engineer)",
-        "duration": "14 days",
-        "resources": [
-            "Code editor",
-            "version control system (Git)"
-        ],
-        "phase": "2. Design & Development"
-    },
-    {
-        "task_name": "2.4 - Back-End Development",
-        "assigned_to": "Jane Doe (Software Engineer)",
-        "duration": "14 days",
-        "resources": [
-            "Code editor",
-            "database management system",
-            "server access"
-        ],
-        "phase": "2. Design & Development"
-    },
-    {
-        "task_name": "2.5 - Content Integration",
-        "assigned_to": "Bob Smith (Designer), Jane Doe (Software Engineer)",
-        "duration": "7 days",
-        "resources": [
-            "Content files",
-            "CMS (if applicable)"
-        ],
-        "phase": "2. Design & Development"
-    },
-    {
-        "task_name": "2.6 - Chatbot Integration",
-        "assigned_to": "Jane Doe (Software Engineer)",
-        "duration": "7 days",
-        "resources": [
-            "Chatbot API documentation",
-            "testing environment"
-        ],
-        "phase": "2. Design & Development"
-    },
-    {
-        "task_name": "3.1 - User Acceptance Testing",
-        "assigned_to": "Alice Johnson (QA Engineer), Tom Brown (QA Engineer), John Doe (Project Manager), Client",
         "duration": "5 days",
         "resources": [
-            "Testing devices",
-            "bug tracking system"
+            "Design software (Figma",
+            "Adobe XD",
+            "etc.)"
         ],
-        "phase": "3. Testing & Deployment"
+        "phase": "2. Design & Prototyping"
     },
     {
-        "task_name": "3.2 - Performance Testing",
+        "task_name": "2.3 - UX Design & User Testing",
+        "assigned_to": "Bob Smith (Designer)",
+        "duration": "5 days",
+        "resources": [
+            "User testing platform",
+            "Participants for testing"
+        ],
+        "phase": "2. Design & Prototyping"
+    },
+    {
+        "task_name": "2.4 - Design Review & Approval",
+        "assigned_to": "John Doe (Project Manager), Bob Smith (Designer)",
+        "duration": "2 days",
+        "resources": [
+            "Presentation materials",
+            "Feedback collection tools"
+        ],
+        "phase": "2. Design & Prototyping"
+    },
+    {
+        "task_name": "3.1 - Front-End Development",
+        "assigned_to": "Jane Doe (Software Engineer)",
+        "duration": "3 weeks",
+        "resources": [
+            "Development environment",
+            "Code editor"
+        ],
+        "phase": "3. Development"
+    },
+    {
+        "task_name": "3.2 - Back-End Development",
+        "assigned_to": "Jane Doe (Software Engineer)",
+        "duration": "3 weeks",
+        "resources": [
+            "Development environment",
+            "Database server"
+        ],
+        "phase": "3. Development"
+    },
+    {
+        "task_name": "3.3 - Content Integration",
+        "assigned_to": "Jane Doe (Software Engineer)",
+        "duration": "2 days",
+        "resources": [
+            "Content from Task 1.4 (Content Strategy)"
+        ],
+        "phase": "3. Development"
+    },
+    {
+        "task_name": "3.4 - API Integration",
+        "assigned_to": "Jane Doe (Software Engineer)",
+        "duration": "2 days",
+        "resources": [
+            "API documentation",
+            "Testing tools"
+        ],
+        "phase": "3. Development"
+    },
+    {
+        "task_name": "3.5 - Initial Testing & Debugging",
+        "assigned_to": "Jane Doe (Software Engineer)",
+        "duration": "4 days",
+        "resources": [
+            "Testing tools",
+            "Debugging tools"
+        ],
+        "phase": "3. Development"
+    },
+    {
+        "task_name": "4.1 - Unit Testing",
+        "assigned_to": "Alice Johnson (QA Engineer), Tom Brown (QA Engineer)",
+        "duration": "1 week",
+        "resources": [
+            "Testing framework",
+            "Test cases"
+        ],
+        "phase": "4. Testing & Deployment"
+    },
+    {
+        "task_name": "4.2 - Integration Testing",
         "assigned_to": "Alice Johnson (QA Engineer), Tom Brown (QA Engineer)",
         "duration": "2 days",
         "resources": [
-            "Performance testing tools"
+            "Testing framework",
+            "Test cases"
         ],
-        "phase": "3. Testing & Deployment"
+        "phase": "4. Testing & Deployment"
     },
     {
-        "task_name": "3.3 - Security Testing",
-        "assigned_to": "Alice Johnson (QA Engineer), Tom Brown (QA Engineer)",
+        "task_name": "4.3 - User Acceptance Testing",
+        "assigned_to": "Alice Johnson (QA Engineer), Tom Brown (QA Engineer), John Doe (Project Manager)",
         "duration": "2 days",
         "resources": [
-            "Security testing tools"
+            "Test environment",
+            "Feedback collection tools"
         ],
-        "phase": "3. Testing & Deployment"
+        "phase": "4. Testing & Deployment"
     },
     {
-        "task_name": "3.4 - Deployment",
+        "task_name": "4.4 - Deployment",
         "assigned_to": "Jane Doe (Software Engineer)",
         "duration": "1 day",
         "resources": [
-            "Server access",
-            "deployment scripts"
+            "Deployment tools",
+            "Server access"
         ],
-        "phase": "3. Testing & Deployment"
+        "phase": "4. Testing & Deployment"
     },
     {
-        "task_name": "3.5 - Post-Launch Monitoring",
-        "assigned_to": "Jane Doe (Software Engineer), John Doe (Project Manager)",
-        "duration": "2 days",
-        "resources": [
-            "Monitoring tools",
-            "communication channels"
-        ],
-        "phase": "3. Testing & Deployment"
-    },
-    {
-        "task_name": "4.1 - Regular Maintenance",
+        "task_name": "5.1 - Monitoring & Maintenance",
         "assigned_to": "Jane Doe (Software Engineer)",
         "duration": "Ongoing",
         "resources": [
             "Monitoring tools",
-            "update scripts"
+            "Issue tracking system"
         ],
-        "phase": "4. Maintenance & Support"
+        "phase": "5. Post-Launch & Maintenance"
     },
     {
-        "task_name": "4.2 - Content Updates",
-        "assigned_to": "Bob Smith (Designer)",
+        "task_name": "5.2 - Security Updates",
+        "assigned_to": "Jane Doe (Software Engineer)",
         "duration": "Ongoing",
         "resources": [
-            "Content management system (CMS)"
+            "Security updates",
+            "Patch management system"
         ],
-        "phase": "4. Maintenance & Support"
+        "phase": "5. Post-Launch & Maintenance"
     },
     {
-        "task_name": "4.3 - Technical Support",
-        "assigned_to": "Jane Doe (Software Engineer), John Doe (Project Manager)",
+        "task_name": "5.3 - Performance Optimization",
+        "assigned_to": "Jane Doe (Software Engineer)",
         "duration": "Ongoing",
         "resources": [
-            "Help desk system",
-            "communication channels"
+            "Performance monitoring tools",
+            "Optimization techniques"
         ],
-        "phase": "4. Maintenance & Support"
+        "phase": "5. Post-Launch & Maintenance"
+    },
+    {
+        "task_name": "5.4 - Content Updates",
+        "assigned_to": "John Doe (Project Manager) (Initially), Client (Eventually)",
+        "duration": "Ongoing",
+        "resources": [
+            "Content management system",
+            "Client communication channels"
+        ],
+        "phase": "5. Post-Launch & Maintenance"
     }
 ]
